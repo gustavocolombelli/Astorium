@@ -1,8 +1,10 @@
 package cliente;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Scanner;
@@ -13,46 +15,43 @@ public class Cliente {
 		
 		try {
 			
-			System.out.println("Estabelecendo conexão...");
-			Socket socket = new Socket("127.0.0.1", 5545);
-			System.out.println("Conexão estabelecida.");
-		
-			ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
-			ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
+			final Socket cliente = new Socket("127.0.0.1", 9999);
 			
-			
-			Scanner entrada = new Scanner(System.in);
-			String login, senha;
-			
-			System.out.print("Login: ");
-			login = entrada.next();
-			System.out.print("Senha: ");
-			senha = entrada.next();
-			
-			System.out.println("Enviando credenciais");
-			
-			output.writeUTF(login);
-			output.writeUTF(senha);
-			
-			output.flush();
-			
-			String mensagemAutenticacaoLogin = input.readUTF();
-			String mensagemAutenticacaoSenha = input.readUTF();
-			System.out.println(mensagemAutenticacaoLogin);
-			System.out.println(mensagemAutenticacaoSenha);
-			
-			input.close();
-			output.close();
-			socket.close();
+			//lendo mensagens do servidor
+			 new Thread() {
+				 @Override
+				 public void run() {
+					 try {
+						BufferedReader leitor = new BufferedReader(new InputStreamReader(cliente.getInputStream()));
+						PrintWriter escritor = new PrintWriter(cliente.getOutputStream());
+						while(true) {
+							String mensagem = leitor.readLine();
+							System.out.println("O servidor disse: " + mensagem);
+						}
+						
+					} catch (IOException e) {
+						System.out.println("Impossivel ler mensagem do servidor");
+						e.printStackTrace();
+					}
+				 }
+			 }.start();
+			 
+			 //escrevendo para o servidor
+			 PrintWriter escritor = new PrintWriter(cliente.getOutputStream(), true);
+			 BufferedReader leitorTerminal = new BufferedReader(new InputStreamReader(System.in));
+			 while(true) {
+				 String mensagemTerminal = leitorTerminal.readLine();
+				 escritor.println(mensagemTerminal);
+			 }
 			
 		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
+			System.out.println("O endereço informado é inválido");
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Conexão recusada");
 			e.printStackTrace();
 		}
-		
+	
 	}
 
 }
