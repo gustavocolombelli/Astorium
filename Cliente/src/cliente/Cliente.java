@@ -2,12 +2,10 @@ package cliente;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Scanner;
 
 public class Cliente {
 	
@@ -26,7 +24,7 @@ public class Cliente {
 						PrintWriter escritor = new PrintWriter(cliente.getOutputStream());
 						while(true) {
 							String mensagem = leitor.readLine();
-							System.out.println("O servidor disse: " + mensagem);
+							System.out.println(mensagem);
 						}
 						
 					} catch (IOException e) {
